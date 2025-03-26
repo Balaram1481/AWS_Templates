@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation Template to create an EC2 Instance"
+
+Resources:
+  MySecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Allow SSH and HTTP access"
+      SecurityGroupIngress:
+        - IpProtocol : tcp
+          FromPort: 22
+          toPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          Cidrip: 0.0.0.0/0
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+     ImageId: ami-00bb6a80f01f03502
+     InstanceType: t2.micro
+     KeyName: My-Key_Pair
+     SecurityGroups:
+       - Ref: MySecurityGroup
+     UserData:
+       Fn::Base64: !Sub |
+         #!/bin/bash
+         yum update -y
+         yum install -y httpd
+         systemctl start httpd
+         systemctl enable httpd
+         systemctl echo "Hello , this is my CloudFormation EC2 Instances!"
+     Tags:
+       - Key: Name
+         Value: MyCloudFormationEC2
